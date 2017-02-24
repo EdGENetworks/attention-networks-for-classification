@@ -7,7 +7,7 @@ We know that documents have a hierarchical structure, words combine to form sent
 
 This picture from [Explosion blog](https://explosion.ai/blog/deep-learning-formula-nlp) explains the structure perfectly.
 
-![alt text](deep-learning-formula-nlp_example.svg "Document Classification")
+![alt text](deep-learning-formula-nlp_example.png "Document Classification")
 
 ### Notebook
 
