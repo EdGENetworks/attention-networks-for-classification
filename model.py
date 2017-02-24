@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-
 def batch_matmul(seq, weight, nonlinearity=''):
     s = None
     for i in range(seq.size(0)):
@@ -31,10 +30,9 @@ def attention_mul(rnn_outputs, att_weights):
     return torch.sum(attn_vectors, 0)
 
 
-class AttentionWordRNN(nn.Module):
+class AttentionWordRNN(nn.Module):    
     
-    
-    def __init__(self, batch_size, num_tokens, embed_size, word_gru_hidden, bidirectional= True):        
+    def __init__(self, batch_size, num_tokens, embed_size, word_gru_hidden, bidirectional= True):     
         
         super(AttentionWordRNN, self).__init__()
         
@@ -43,8 +41,6 @@ class AttentionWordRNN(nn.Module):
         self.embed_size = embed_size
         self.word_gru_hidden = word_gru_hidden
         self.bidirectional = bidirectional
-#         self.max_words = max_words
-
         
         self.lookup = nn.Embedding(num_tokens, embed_size)
         if bidirectional == True:
@@ -56,13 +52,12 @@ class AttentionWordRNN(nn.Module):
             self.word_gru = nn.GRU(embed_size, word_gru_hidden, bidirectional= False)
             self.weight_W_word = nn.Parameter(torch.Tensor(word_gru_hidden, word_gru_hidden))
 #             self.bias_word = nn.Parameter(torch.Tensor(word_gru_hidden,1))
-            self.weight_proj_word = nn.Parameter(torch.Tensor(word_gru_hidden, 1))
-            
+            self.weight_proj_word = nn.Parameter(torch.Tensor(word_gru_hidden, 1))            
         self.softmax_word = nn.Softmax()
-        
+        self.weight_W_word.data.uniform_(-0.1, 0.1)
+        self.weight_proj_word.data.uniform_(-0.1,0.1)        
         
     def forward(self, embed, state_word):
-        # embeddings
         embedded = self.lookup(embed)
 #         print embedded.size()
         # word level gru
@@ -74,8 +69,7 @@ class AttentionWordRNN(nn.Module):
         word_attn = batch_matmul(word_squish, self.weight_proj_word)
         word_attn = self.softmax_word(word_attn)
         word_attn_vectors = attention_mul(output_word, word_attn)
-#         print word_attn_vectors.size()
-        
+#         print word_attn_vectors.size()        
         return word_attn_vectors
     
     def init_hidden(self):
@@ -85,8 +79,7 @@ class AttentionWordRNN(nn.Module):
             return Variable(torch.zeros(1, self.batch_size, self.word_gru_hidden))        
         
         
-class AttentionSentRNN(nn.Module):
-    
+class AttentionSentRNN(nn.Module):    
     
     def __init__(self, batch_size, sent_gru_hidden, word_gru_hidden, n_classes, bidirectional= True):        
         
@@ -113,25 +106,23 @@ class AttentionSentRNN(nn.Module):
             self.final_linear = nn.Linear(sent_gru_hidden, n_classes)
         self.softmax_sent = nn.Softmax()
         self.final_softmax = nn.Softmax()
+        self.weight_W_sent.data.uniform_(-0.1, 0.1)
+        self.weight_proj_sent.data.uniform_(-0.1,0.1)
         
     def forward(self, word_attention_vectors, state_sent):
         '''
-        Pass a combination of sentence vectors for a batch, I know that this is a little 
-        confusing in the beginning, but hold on to it for a while.
-        Size word_attention_vectors = sentences_length X batch_size X word_gru_hidden_size
+        Pass a combination of word level attention vectors as input
         '''
 #         print word_attention_vectors.size()
         # sent level gru
         output_sent, state_sent = self.sent_gru(word_attention_vectors, state_sent)
-#         print state_sent.size()
-        
+#         print state_sent.size()        
         # sent level attention
         sent_squish = batch_matmul(output_sent, self.weight_W_sent ,nonlinearity='tanh')
         sent_attn = batch_matmul(sent_squish, self.weight_proj_sent)
 #         print sent_attn.size()
         sent_attn = self.softmax_sent(sent_attn)
-        sent_attn_vectors = attention_mul(output_sent, sent_attn)
-        
+        sent_attn_vectors = attention_mul(output_sent, sent_attn)        
         # final classifier
 #         print sent_attn_vectors.squeeze(0).size()
         final_map = self.final_linear(sent_attn_vectors.squeeze(0))
