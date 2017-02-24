@@ -70,7 +70,7 @@ class AttentionWordRNN(nn.Module):
         word_attn = self.softmax_word(word_attn)
         word_attn_vectors = attention_mul(output_word, word_attn)
 #         print word_attn_vectors.size()        
-        return word_attn_vectors
+        return word_attn_vectors, state_word
     
     def init_hidden(self):
         if self.bidirectional == True:
@@ -127,7 +127,7 @@ class AttentionSentRNN(nn.Module):
 #         print sent_attn_vectors.squeeze(0).size()
         final_map = self.final_linear(sent_attn_vectors.squeeze(0))
 #         final_cls = self.final_softmax(final_map)
-        return F.log_softmax(final_map)
+        return F.log_softmax(final_map), state_sent
     
     def init_hidden(self):
         if self.bidirectional == True:
