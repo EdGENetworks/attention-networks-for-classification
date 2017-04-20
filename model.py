@@ -148,7 +148,7 @@ class AttentionSentRNN(nn.Module):
         sent_squish = batch_matmul_bias(output_sent, self.weight_W_sent,self.bias_sent, nonlinearity='tanh')
         sent_attn = batch_matmul(sent_squish, self.weight_proj_sent)
         sent_attn_norm = self.softmax_sent(sent_attn.transpose(1,0))
-        sent_attn_vectors = attention_mul(output_sent, sent_attn.transpose(1,0))        
+        sent_attn_vectors = attention_mul(output_sent, sent_attn_norm.transpose(1,0))        
         # final classifier
         final_map = self.final_linear(sent_attn_vectors.squeeze(0))
         return F.log_softmax(final_map), state_sent, sent_attn_norm
