@@ -97,9 +97,9 @@ class AttentionWordRNN(nn.Module):
 #         print output_word.size()
         word_squish = batch_matmul_bias(output_word, self.weight_W_word,self.bias_word, nonlinearity='tanh')
         word_attn = batch_matmul(word_squish, self.weight_proj_word)
-        word_attn = self.softmax_word(word_attn)
-        word_attn_vectors = attention_mul(output_word, word_attn)        
-        return word_attn_vectors, state_word, word_attn
+        word_attn_norm = self.softmax_word(word_attn.transpose(1,0))
+        word_attn_vectors = attention_mul(output_word, word_attn_norm.transpose(1,0))        
+        return word_attn_vectors, state_word, word_attn_norm
     
     def init_hidden(self):
         if self.bidirectional == True:
@@ -147,11 +147,11 @@ class AttentionSentRNN(nn.Module):
         output_sent, state_sent = self.sent_gru(word_attention_vectors, state_sent)        
         sent_squish = batch_matmul_bias(output_sent, self.weight_W_sent,self.bias_sent, nonlinearity='tanh')
         sent_attn = batch_matmul(sent_squish, self.weight_proj_sent)
-        sent_attn = self.softmax_sent(sent_attn)
-        sent_attn_vectors = attention_mul(output_sent, sent_attn)        
+        sent_attn_norm = self.softmax_sent(sent_attn.transpose(1,0))
+        sent_attn_vectors = attention_mul(output_sent, sent_attn.transpose(1,0))        
         # final classifier
         final_map = self.final_linear(sent_attn_vectors.squeeze(0))
-        return F.log_softmax(final_map), state_sent, sent_attn
+        return F.log_softmax(final_map), state_sent, sent_attn_norm
     
     def init_hidden(self):
         if self.bidirectional == True:
