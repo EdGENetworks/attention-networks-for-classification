@@ -9,7 +9,8 @@ This is an (close) implementation of the model in PyTorch.
 
 1. I jointly optimize both the word and sentence attention models with the same optimizer.
 2. The minibatches are padded with zeros. This can be improved, one can sort senteces with similar length together, and minimize the paddings.
-3. Pytorch does not yet support gradient masking, so padded zeros will have gradients flowing through them during backpropagation. One can create a mask, but since I am interested in using Bidirectional GRU, it is not possible to use a mask. I've seen that variable length RNN supoort is coming soon to Pytorch as well.
+3. ~~Pytorch does not yet support gradient masking, so padded zeros will have gradients flowing through them during backpropagation. One can create a mask, but since I am interested in using Bidirectional GRU, it is not possible to use a mask. I've seen that variable length RNN supoort is coming soon to Pytorch as well.~~
+  Update: Pytorch does supoort masked RNN now with pack_padded_sequence method.
 
 This picture from [Explosion blog](https://explosion.ai/blog/deep-learning-formula-nlp) explains the structure perfectly.
 
