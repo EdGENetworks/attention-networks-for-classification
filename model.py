@@ -132,7 +132,7 @@ class AttentionSentRNN(nn.Module):
             self.weight_proj_sent = nn.Parameter(torch.Tensor(2* sent_gru_hidden, 1))
             self.final_linear = nn.Linear(2* sent_gru_hidden, n_classes)
         else:
-            self.sent_gru = nn.GRU(word_gru_hidden, sent_gru_hidden, bidirectional= True)        
+            self.sent_gru = nn.GRU(word_gru_hidden, sent_gru_hidden, bidirectional= False)        
             self.weight_W_sent = nn.Parameter(torch.Tensor(sent_gru_hidden ,sent_gru_hidden))
             self.bias_sent = nn.Parameter(torch.Tensor(sent_gru_hidden,1))
             self.weight_proj_sent = nn.Parameter(torch.Tensor(sent_gru_hidden, 1))
